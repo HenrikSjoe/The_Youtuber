@@ -1,5 +1,11 @@
 import streamlit as st
 import requests
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+url = f"https://the-youtuber-hs-de24.azurewebsites.net/rag/query?code={os.getenv('FUNCTION_APP_API')}"
 
 st.set_page_config(page_title="Chat with The Youtuber", layout="wide")
 
@@ -12,7 +18,7 @@ user_question = st.text_input("Your question:", placeholder="How do I setup Duck
 
 if st.button("Send") and user_question != "":
         response = requests.post(
-            "http://127.0.0.1:8000/rag/query", json={"prompt": user_question}
+            url, json={"prompt": user_question}
         )
 
         data = response.json()
