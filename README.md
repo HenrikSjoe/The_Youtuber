@@ -21,16 +21,21 @@ This project creates an AI-powered assistant that answers questions based on vid
 ```
 User Question
      ↓
-[Streamlit Frontend] → [FastAPI Backend] → [PydanticAI Agent]
-                                                 ↓
-                                          [LanceDB Vector DB]
-                                                 ↓
-                                          [Video Transcripts]
-                                                 ↓
-                                          [Gemini 2.5 Flash]
-                                                 ↓
-                                            Response
+[Streamlit Frontend] → [Azure Functions API] → [PydanticAI Agent]
+                                                      ↓
+                                               [LanceDB Vector DB]
+                                                      ↓
+                                               [Video Transcripts]
+                                                      ↓
+                                               [Gemini 2.5 Flash]
+                                                      ↓
+                                                  Response
 ```
+
+**Deployment:**
+- Backend: Azure Functions (serverless)
+- Frontend: Can be run locally or deployed
+- Database: LanceDB vector database (file-based)
 
 ## 🚀 Getting Started
 
@@ -58,6 +63,7 @@ User Question
    Create a `.env` file in the root directory:
    ```bash
    GOOGLE_API_KEY=your_google_api_key_here
+   FUNCTION_APP_API=your_azure_function_api_key_here
    ```
 
 4. **Run data ingestion** (First time only)
@@ -73,31 +79,35 @@ User Question
 
 ### Running the Application
 
-1. **Start the FastAPI backend**
-   ```bash
-   uv run uvicorn api:app --reload
-   ```
-   API will be available at `http://127.0.0.1:8000`
-
-   Interactive API docs: `http://127.0.0.1:8000/docs`
-
-2. **Start the Streamlit frontend** (in a new terminal)
+**Option 1: Use the deployed Azure Functions API (Recommended)**
    ```bash
    uv run streamlit run frontend/app.py
    ```
    Frontend will open automatically at `http://localhost:8501`
 
-## 📸 Screenshots
+   The app connects to the live Azure Functions API automatically.
 
-### Streamlit Interface
-![Streamlit Frontend](assets/streamlit_demo.png)
-*Ask questions about data engineering topics*
+**Option 2: Local development with FastAPI**
 
-### API Documentation
-![FastAPI Docs](assets/api_docs.png)
-*Interactive API documentation with Swagger UI*
+   For local development and testing:
 
-### Example Query
+   1. Start the FastAPI backend:
+      ```bash
+      uv run uvicorn api:app --reload
+      ```
+      API available at `http://127.0.0.1:8000`
+
+   2. Update [frontend/app.py](frontend/app.py) to use local endpoint:
+      ```python
+      url = "http://127.0.0.1:8000/rag/query"
+      ```
+
+   3. Start Streamlit:
+      ```bash
+      uv run streamlit run frontend/app.py
+      ```
+
+## 💡 Example Usage
 **Question:** "Tell me about OOP"
 
 **Response:**
@@ -115,9 +125,12 @@ The_Youtuber/
 │   └── rag.py             # RAG agent logic
 ├── data/                   # Video transcript files (.md)
 ├── frontend/
-│   └── app.py             # Streamlit UI
+│   └── app.py             # Streamlit UI (connects to Azure)
 ├── knowledge_base/         # LanceDB vector database
-├── api.py                 # FastAPI endpoints
+├── api.py                 # FastAPI endpoints (local dev)
+├── function_app.py        # Azure Functions entry point
+├── host.json              # Azure Functions configuration
+├── requirements.txt       # Azure Functions dependencies
 ├── ingestion.py           # Data ingestion script
 ├── .env                   # Environment variables
 ├── pyproject.toml         # Project dependencies
@@ -127,7 +140,8 @@ The_Youtuber/
 ## 🛠️ Technologies Used
 
 - **PydanticAI**: AI agent framework with structured outputs
-- **FastAPI**: High-performance API framework
+- **Azure Functions**: Serverless backend deployment
+- **FastAPI**: High-performance API framework (local dev)
 - **Streamlit**: Interactive web frontend
 - **LanceDB**: Vector database for embeddings
 - **Google Gemini**: LLM and embedding model
@@ -167,6 +181,8 @@ Query the RAG chatbot
 - ✅ Fast retrieval with LanceDB
 - ✅ Interactive web interface
 - ✅ RESTful API
+- ✅ Serverless deployment on Azure Functions
+- ✅ Cloud-based accessibility
 
 ## 🧪 Example Queries
 
@@ -182,6 +198,20 @@ Try asking:
 - First-time ingestion takes ~10 minutes due to Google API rate limits
 - The system uses `gemini-2.5-flash` for generation and `gemini-embedding-001` for embeddings
 - Responses are limited to 6 sentences for clarity
+
+## ☁️ Deployment
+
+The application is deployed on **Azure Functions** for serverless backend hosting.
+
+**Live API:** `https://the-youtuber-hs-de24.azurewebsites.net`
+
+**Deployment steps:**
+1. Set up Azure Functions app
+2. Configure environment variables (`GOOGLE_API_KEY`) in Azure Portal
+3. Deploy using Azure Functions Core Tools or VS Code extension
+4. Upload `knowledge_base/` directory to Azure storage or include in deployment
+
+The frontend Streamlit app connects to the Azure Functions API using the `FUNCTION_APP_API` key for authentication.
 
 ## 📄 License
 
